@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Air Strike: CSAT English (Color Fixed)</title>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Pretendard', sans-serif; cursor: crosshair; }
+        canvas { display: block; }
+        
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .hud { position: absolute; padding: 20px; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        #score-board { top: 10px; left: 20px; font-size: 20px; border-left: 4px solid #3498db; padding-left: 10px; }
+        #life-board { top: 10px; right: 20px; font-size: 20px; color: #ff7675; }
+        
+        #question-box {
+            position: absolute; top: 50px; left: 50%; transform: translateX(-50%);
+            text-align: center; width: 100%;
+        }
+        #en-text { font-size: 36px; font-weight: 800; color: #f1c40f; letter-spacing: -1px; margin-bottom: 5px; }
+        #instruction { font-size: 14px; color: #bdc3c7; }
+
+        #game-over {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(15, 15, 25, 0.95); padding: 50px; border-radius: 15px;
+            text-align: center; display: none; pointer-events: auto; border: 2px solid #3498db; color: white;
+        }
+        button { 
+            padding: 12px 35px; font-size: 18px; background: #3498db; color: white; 
+            border: none; border-radius: 5px; cursor: pointer; transition: 0.3s;
+        }
+        button:hover { background: #2980b9; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="ui-layer">
+    <div id="score-board" class="hud">SCORE: 0</div>
+    <div id="life-board" class="hud">LIFE: ❤❤❤</div>
+    <div id="question-box">
+        <div id="en-text">LOADING...</div>
+        <div id="instruction">모든 적기의 색상은 동일합니다. 텍스트를 보고 정답을 클릭하세요!</div>
+    </div>
+    <div id="game-over">
+        <h1 style="font-size: 40px; color: #ff7675;">GAME OVER</h1>
+        <p id="final-stats" style="font-size: 20px; margin-bottom: 30px;"></p>
+        <button onclick="location.reload()">다시 도전</button>
+    </div>
+</div>
+
+<script>
+// --- 데이터셋 (데이터 누락을 방지하기 위해 전체 데이터 직접 포함) ---
+const phraseData = [
+    { "en": "attribute A to B", "ko": "A를 B의 탓(덕분)으로 돌리다" },
+  { "en": "ascribe A to B", "ko": "A를 B의 결과로 여기다" },
+  { "en": "distinguish A from B", "ko": "A와 B를 구별하다" },
+  { "en": "differentiate A from B", "ko": "A를 B와 차별화하다" },
+  { "en": "keep A from -ing", "ko": "A가 ~하는 것을 막다/방해하다" },
+  { "en": "prevent A from -ing", "ko": "A가 ~하지 못하게 예방하다" },
+  { "en": "prohibit A from -ing", "ko": "A가 ~하는 것을 금지하다" },
+  { "en": "take A into account", "ko": "A를 고려하다" },
+  { "en": "take A for granted", "ko": "A를 당연하게 여기다" },
+  { "en": "provide A with B", "ko": "A에게 B를 제공하다" },
+  { "en": "present A with B", "ko": "A에게 B를 제시/증정하다" },
+  { "en": "devote A to B", "ko": "A를 B에 바치다/전념하다" },
+  { "en": "commit oneself to N", "ko": "~에 전념하다/약속하다" },
+  { "en": "remind A of B", "ko": "A에게 B를 상기시키다" },
+  { "en": "inform A of B", "ko": "A에게 B를 알리다" },
+  { "en": "accuse A of B", "ko": "A를 B의 혐의로 비난/고발하다" },
+  { "en": "deprive A of B", "ko": "A에게서 B를 박탈하다" },
+  { "en": "rob A of B", "ko": "A에게서 B를 강탈하다" },
+  { "en": "replace A with B", "ko": "A를 B로 교체하다" },
+  { "en": "substitute A for B", "ko": "B 대신 A를 쓰다 (A로 대체하다)" },
+  { "en": "refer to A as B", "ko": "A를 B라고 부르다/언급하다" },
+  { "en": "regard A as B", "ko": "A를 B로 간주하다" },
+  { "en": "view A as B", "ko": "A를 B라고 보다" },
+  { "en": "transform A into B", "ko": "A를 B로 변형시키다" },
+  { "en": "translate A into B", "ko": "A를 B로 번역/해석하다" },
+  { "en": "impose A on B", "ko": "A를 B에게 부과/강요하다" },
+  { "en": "congratulate A on B", "ko": "A에게 B에 대해 축하하다" },
+  { "en": "base A on B", "ko": "A를 B에 근거를 두다" },
+  { "en": "blame A for B", "ko": "B에 대해 A를 비난하다" },
+  { "en": "exchange A for B", "ko": "A를 B와 교환하다" },
+  { "en": "mistake A for B", "ko": "A를 B로 오해/착각하다" },
+  { "en": "warn A of B", "ko": "A에게 B를 경고하다" },
+  { "en": "protect A from B", "ko": "A를 B로부터 보호하다" },
+  { "en": "derive A from B", "ko": "B에서 A를 이끌어내다/유래하다" },
+  { "en": "owe A to B", "ko": "A는 B 덕분이다" },
+  { "en": "relieve A of B", "ko": "A에게서 B(부담 등)를 덜어주다" },
+  { "en": "clear A of B", "ko": "A에게서 B(혐의 등)를 벗겨주다" },
+  { "en": "share A with B", "ko": "A를 B와 공유하다" },
+  { "en": "associate A with B", "ko": "A를 B와 연관시키다" },
+  { "en": "identify A with B", "ko": "A와 B를 동일시하다" },
+  { "en": "equate A with B", "ko": "A와 B를 동등하게 생각하다" },
+  { "en": "charge A with B", "ko": "A를 B의 혐의로 기소/책임을 맡기다" },
+  { "en": "compare A to B", "ko": "A를 B에 비유하다" },
+  { "en": "compare A with B", "ko": "A와 B를 비교하다" },
+  { "en": "adapt A to B", "ko": "A를 B에 적응/맞추다" },
+  { "en": "attach A to B", "ko": "A를 B에 붙이다/첨부하다" },
+  { "en": "confine A to B", "ko": "A를 B에 국한시키다/가두다" },
+  { "en": "entitle A to B", "ko": "A에게 B의 자격을 주다" },
+  { "en": "expose A to B", "ko": "A를 B에 노출시키다" },
+  { "en": "add A to B", "ko": "A를 B에 더하다" },
+  { "en": "depend on / rely on", "ko": "~에 의존하다/달려있다" },
+  { "en": "count on", "ko": "~을 믿다/기대다" },
+  { "en": "resort to N", "ko": "(최후의 수단으로) ~에 호소하다" },
+  { "en": "contribute to N", "ko": "~에 기여하다/원인이 되다" },
+  { "en": "lead to N", "ko": "~로 이어지다/야기하다" },
+  { "en": "result in", "ko": "~한 결과를 낳다" },
+  { "en": "result from", "ko": "~에서 기인하다 (원인)" },
+  { "en": "consist of", "ko": "~로 구성되다" },
+  { "en": "consist in", "ko": "~에 (본질이) 있다" },
+  { "en": "comply with", "ko": "~을 준수하다/따르다" },
+  { "en": "conform to", "ko": "~에 순응하다/일치하다" },
+  { "en": "interfere with", "ko": "~을 방해하다/간섭하다" },
+  { "en": "cope with / deal with", "ko": "~에 대처하다/다루다" },
+  { "en": "object to -ing/N", "ko": "~에 반대하다" },
+  { "en": "participate in", "ko": "~에 참여하다" },
+  { "en": "specialize in", "ko": "~을 전문으로 하다" },
+  { "en": "succeed in", "ko": "~에 성공하다" },
+  { "en": "succeed to N", "ko": "~을 계승하다" },
+  { "en": "apologize to A for B", "ko": "A에게 B에 대해 사과하다" },
+  { "en": "belong to N", "ko": "~에 속하다" },
+  { "en": "respond to / react to", "ko": "~에 반응하다/응답하다" },
+  { "en": "subscribe to N", "ko": "~을 구독하다/동의하다" },
+  { "en": "accustom oneself to N", "ko": "~에 익숙해지다" },
+  { "en": "amount to N", "ko": "(합계가) ~에 이르다 / ~와 마찬가지다" },
+  { "en": "appeal to N", "ko": "~에 호소하다 / 매력이 있다" },
+  { "en": "apply for", "ko": "~에 지원/신청하다" },
+  { "en": "apply to N", "ko": "~에 적용되다" },
+  { "en": "care for", "ko": "~을 돌보다 / 좋아하다" },
+  { "en": "complain about", "ko": "~에 대해 불평하다" },
+  { "en": "concentrate on / focus on", "ko": "~에 집중하다" },
+  { "en": "coincide with", "ko": "~와 동시에 일어나다/일치하다" },
+  { "en": "collide with", "ko": "~와 충돌하다" },
+  { "en": "depart from", "ko": "~에서 떠나다/벗어나다" },
+  { "en": "dispose of", "ko": "~을 처분하다/제거하다" },
+  { "en": "emerge from", "ko": "~에서 나타나다/벗어나다" },
+  { "en": "experiment with", "ko": "~으로 실험하다" },
+  { "en": "graduate from", "ko": "~을 졸업하다" },
+  { "en": "insist on", "ko": "~을 주장하다/고집하다" },
+  { "en": "listen to N", "ko": "~을 경청하다" },
+  { "en": "long for", "ko": "~을 갈망하다" },
+  { "en": "look at", "ko": "~을 보다" },
+  { "en": "look for", "ko": "~을 찾다" },
+  { "en": "look into", "ko": "~을 조사하다" },
+  { "en": "pay for", "ko": "~에 대한 대가를 지불하다" },
+  { "en": "persist in", "ko": "~을 고집하다/지속하다" },
+  { "en": "prepare for", "ko": "~을 준비하다" },
+  { "en": "profit from", "ko": "~에서 이익을 얻다" },
+  { "en": "refrain from -ing", "ko": "~을 삼가다/그만두다" },
+  { "en": "strive for", "ko": "~을 위해 노력하다" },
+  { "en": "wait for", "ko": "~을 기다리다" }
+];
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let score = 0;
+let life = 3;
+let gameActive = true;
+let currentQuestion = null;
+let enemies = [];
+let clouds = [];
+let particles = [];
+
+// 플레이어 비행기
+const player = { x: canvas.width / 2, y: canvas.height - 120, targetX: canvas.width / 2, tilt: 0 };
+
+// 배경 구름 생성
+for(let i=0; i<15; i++) {
+    clouds.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*100+50, speed: Math.random()*2+1 });
+}
+
+class EnemyPlane {
+    constructor(text, isCorrect, xPos) {
+        this.text = text;
+        this.isCorrect = isCorrect;
+        this.x = xPos;
+        this.y = -100;
+        this.w = 180;
+        this.h = 60;
+        this.speed = 2 + (score / 150);
+        // [수정] 정답과 오답 상관없이 색상(H)을 210(파란색)으로 통일
+        this.hue = 210; 
+    }
+
+    draw() {
+        ctx.save();
+        // 적기 기체 색상 통일
+        ctx.fillStyle = `hsl(${this.hue}, 70%, 40%)`;
+        ctx.beginPath();
+        ctx.roundRect(this.x - this.w/2, this.y, this.w, this.h, 10);
+        ctx.fill();
+        // 날개
+        ctx.fillStyle = `hsl(${this.hue}, 30%, 30%)`;
+        ctx.fillRect(this.x - this.w/2 - 20, this.y + 20, 20, 20);
+        ctx.fillRect(this.x + this.w/2, this.y + 20, 20, 20);
+        // 텍스트
+        ctx.fillStyle = '#fff';
+        ctx.font = '15px Pretendard';
+        ctx.textAlign = 'center';
+        ctx.fillText(this.text, this.x, this.y + this.h/2 + 5);
+        ctx.restore();
+    }
+}
+
+function spawnWave() {
+    if(!gameActive) return;
+    currentQuestion = phraseData[Math.floor(Math.random() * phraseData.length)];
+    document.getElementById('en-text').innerText = currentQuestion.en;
+
+    enemies = [];
+    let options = [currentQuestion.ko];
+    while(options.length < 3) {
+        let rand = phraseData[Math.floor(Math.random() * phraseData.length)].ko;
+        if(!options.includes(rand)) options.push(rand);
+    }
+    options.sort(() => Math.random() - 0.5);
+
+    options.forEach((opt, i) => {
+        const xPos = (canvas.width / 4) * (i + 1);
+        enemies.push(new EnemyPlane(opt, opt === currentQuestion.ko, xPos));
+    });
+}
+
+function drawPlayer() {
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    player.tilt = (player.targetX - player.x) * 0.1;
+    ctx.rotate(player.tilt * Math.PI / 180);
+
+    // 전투기 몸체
+    ctx.fillStyle = '#3498db';
+    ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(-30, 20); ctx.lineTo(30, 20); ctx.closeFill; ctx.fill();
+    // 날개
+    ctx.fillStyle = '#2980b9'; ctx.fillRect(-50, 0, 100, 10);
+    // 엔진 불꽃
+    ctx.fillStyle = Math.random() > 0.5 ? '#f1c40f' : '#e67e22'; ctx.fillRect(-10, 20, 20, 15);
+    ctx.restore();
+    player.x += (player.targetX - player.x) * 0.1;
+}
+
+function createExplosion(x, y, isCorrect) {
+    // [수정] 폭발 색상도 정답/오답에 따라 분리 (노랑/강렬한 주황)
+    const color = isCorrect ? '#f39c12' : '#ff4757';
+    for(let i=0; i<15; i++) {
+        particles.push({
+            x, y,
+            vx: (Math.random()-0.5)*10,
+            vy: (Math.random()-0.5)*10,
+            life: 1.0,
+            color: color
+        });
+    }
+}
+
+function update() {
+    clouds.forEach(c => {
+        c.y += c.speed;
+        if(c.y > canvas.height) { c.y = -c.size; c.x = Math.random()*canvas.width; }
+    });
+    enemies.forEach((en, i) => {
+        en.y += en.speed;
+        if(en.y > canvas.height) {
+            if(en.isCorrect) { life--; updateLife(); spawnWave(); }
+            else enemies.splice(i, 1);
+        }
+    });
+    particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+        if(p.life <= 0) particles.splice(i, 1);
+    });
+    if(life <= 0 && gameActive) gameOver();
+}
+
+function draw() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    clouds.forEach(c => {
+        ctx.beginPath(); ctx.arc(c.x, c.y, c.size, 0, Math.PI*2); ctx.fill();
+    });
+    enemies.forEach(en => en.draw());
+    drawPlayer();
+    particles.forEach(p => { ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); });
+    ctx.globalAlpha = 1.0;
+    update();
+    if(gameActive) requestAnimationFrame(draw);
+}
+
+function updateLife() { document.getElementById('life-board').innerText = `LIFE: ${"❤".repeat(life)}`; }
+
+function gameOver() {
+    gameActive = false;
+    document.getElementById('game-over').style.display = 'block';
+    document.getElementById('final-stats').innerText = `최종 SCORE: ${score}`;
+}
+
+// 클릭 이벤트
+canvas.addEventListener('mousedown', (e) => {
+    if(!gameActive) return;
+    const mx = e.clientX, my = e.clientY;
+    enemies.forEach((en, i) => {
+        if(mx > en.x - en.w/2 && mx < en.x + en.w/2 && my > en.y && my < en.y + en.h) {
+            createExplosion(en.x, en.y + en.h/2, en.isCorrect); // [수정] 폭발 함수에 정답 여부 전달
+            if(en.isCorrect) {
+                score += 10;
+                document.getElementById('score-board').innerText = `SCORE: ${score}`;
+                spawnWave();
+            } else {
+                life--;
+                updateLife();
+                enemies.splice(i, 1);
+            }
+        }
+    });
+});
+window.addEventListener('mousemove', (e) => { player.targetX = e.clientX; });
+spawnWave();
+draw();
+</script>
+</body>
+</html>
