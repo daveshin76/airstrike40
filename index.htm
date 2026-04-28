@@ -2,55 +2,45 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Air Strike: CSAT English (Color Fixed)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Ultimate Shooter</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: 'Pretendard', sans-serif; cursor: crosshair; }
+        body { margin: 0; background: #050810; overflow: hidden; font-family: 'Pretendard', sans-serif; touch-action: none; }
         canvas { display: block; }
-        
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .hud { position: absolute; padding: 20px; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
-        #score-board { top: 10px; left: 20px; font-size: 20px; border-left: 4px solid #3498db; padding-left: 10px; }
-        #life-board { top: 10px; right: 20px; font-size: 20px; color: #ff7675; }
-        
-        #question-box {
-            position: absolute; top: 50px; left: 50%; transform: translateX(-50%);
-            text-align: center; width: 100%;
+        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .hud { position: absolute; padding: 15px; color: #fff; font-weight: bold; font-size: 20px; text-shadow: 2px 2px 4px #000; }
+        #score-board { top: 5px; left: 10px; color: #f1c40f; }
+        #life-board { top: 5px; right: 10px; font-size: 20px; color: #ff4757; letter-spacing: 2px; }
+        #question-area { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); width: 95%; text-align: center; }
+        #en-text { 
+            font-size: 32px; font-weight: 900; color: #fff; background: rgba(0, 110, 255, 0.9); 
+            padding: 15px 20px; border-radius: 18px; display: inline-block; border: 2px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
-        #en-text { font-size: 36px; font-weight: 800; color: #f1c40f; letter-spacing: -1px; margin-bottom: 5px; }
-        #instruction { font-size: 14px; color: #bdc3c7; }
-
         #game-over {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(15, 15, 25, 0.95); padding: 50px; border-radius: 15px;
-            text-align: center; display: none; pointer-events: auto; border: 2px solid #3498db; color: white;
+            background: #fff; padding: 40px; border-radius: 20px; text-align: center; display: none; pointer-events: auto; width: 80%;
         }
-        button { 
-            padding: 12px 35px; font-size: 18px; background: #3498db; color: white; 
-            border: none; border-radius: 5px; cursor: pointer; transition: 0.3s;
-        }
-        button:hover { background: #2980b9; transform: scale(1.05); }
+        button { padding: 18px 35px; font-size: 24px; background: #007aff; color: #fff; border: none; border-radius: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <canvas id="gameCanvas"></canvas>
 
-<div id="ui-layer">
+<div id="ui">
     <div id="score-board" class="hud">SCORE: 0</div>
-    <div id="life-board" class="hud">LIFE: ❤❤❤</div>
-    <div id="question-box">
-        <div id="en-text">LOADING...</div>
-        <div id="instruction">모든 적기의 색상은 동일합니다. 텍스트를 보고 정답을 클릭하세요!</div>
-    </div>
+    <div id="life-board" class="hud">❤❤❤❤❤</div>
+    <div id="question-area"><div id="en-text">READY?</div></div>
     <div id="game-over">
-        <h1 style="font-size: 40px; color: #ff7675;">GAME OVER</h1>
-        <p id="final-stats" style="font-size: 20px; margin-bottom: 30px;"></p>
-        <button onclick="location.reload()">다시 도전</button>
+        <h1 style="color:#333">MISSION FAILED</h1>
+        <p id="final-stats" style="font-size: 22px; color: #666;"></p>
+        <button onclick="location.reload()">다시 시작</button>
     </div>
 </div>
 
 <script>
-// --- 데이터셋 (데이터 누락을 방지하기 위해 전체 데이터 직접 포함) ---
+// 데이터 (모바일 가독성을 위해 뜻을 간결하게 유지)
 const phraseData = [
     { "en": "attribute A to B", "ko": "A를 B의 탓(덕분)으로 돌리다" },
   { "en": "ascribe A to B", "ko": "A를 B의 결과로 여기다" },
@@ -156,171 +146,145 @@ const phraseData = [
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+let w, h;
+function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize);
+resize();
 
-let score = 0;
-let life = 3;
-let gameActive = true;
-let currentQuestion = null;
-let enemies = [];
-let clouds = [];
-let particles = [];
+let score = 0, life = 5, gameActive = true, currentQuestion = null;
+let enemies = [], particles = [], stars = [];
+let player = { x: w / 2, y: h - 110, targetX: w / 2, tilt: 0, recoil: 0 };
 
-// 플레이어 비행기
-const player = { x: canvas.width / 2, y: canvas.height - 120, targetX: canvas.width / 2, tilt: 0 };
+for(let i=0; i<25; i++) stars.push({ x: Math.random()*w, y: Math.random()*h, s: Math.random()*2+1 });
 
-// 배경 구름 생성
-for(let i=0; i<15; i++) {
-    clouds.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*100+50, speed: Math.random()*2+1 });
-}
-
-class EnemyPlane {
-    constructor(text, isCorrect, xPos) {
-        this.text = text;
-        this.isCorrect = isCorrect;
-        this.x = xPos;
-        this.y = -100;
-        this.w = 180;
-        this.h = 60;
-        this.speed = 2 + (score / 150);
-        // [수정] 정답과 오답 상관없이 색상(H)을 210(파란색)으로 통일
-        this.hue = 210; 
+class Enemy {
+    constructor(text, isCorrect, xPos, isHeal = false) {
+        this.text = text; this.isCorrect = isCorrect; this.isHeal = isHeal;
+        this.x = xPos; this.y = -150;
+        this.w = w * 0.28; this.h = 85;
+        this.speed = 2.8 + (score / 150);
     }
-
     draw() {
         ctx.save();
-        // 적기 기체 색상 통일
-        ctx.fillStyle = `hsl(${this.hue}, 70%, 40%)`;
-        ctx.beginPath();
-        ctx.roundRect(this.x - this.w/2, this.y, this.w, this.h, 10);
-        ctx.fill();
-        // 날개
-        ctx.fillStyle = `hsl(${this.hue}, 30%, 30%)`;
-        ctx.fillRect(this.x - this.w/2 - 20, this.y + 20, 20, 20);
-        ctx.fillRect(this.x + this.w/2, this.y + 20, 20, 20);
-        // 텍스트
-        ctx.fillStyle = '#fff';
-        ctx.font = '15px Pretendard';
-        ctx.textAlign = 'center';
-        ctx.fillText(this.text, this.x, this.y + this.h/2 + 5);
+        ctx.translate(this.x, this.y);
+        ctx.fillStyle = this.isHeal ? "#2ecc71" : "#fff";
+        // 비행기(자동차) 모양 그리기
+        ctx.beginPath(); ctx.ellipse(-25, 0, 8, 22, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(25, 0, 8, 22, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(-this.w/2, 10, this.w, this.h, 15); ctx.fill();
+        
+        ctx.fillStyle = this.isHeal ? "#fff" : "#000";
+        ctx.font = "bold 19px Pretendard";
+        ctx.textAlign = "center";
+        if(this.text.length > 7) {
+            ctx.fillText(this.text.substring(0, 7), 0, 50);
+            ctx.fillText(this.text.substring(7), 0, 75);
+        } else { ctx.fillText(this.text, 0, 65); }
         ctx.restore();
     }
+    update() { this.y += this.speed; }
 }
 
-function spawnWave() {
+function spawn() {
     if(!gameActive) return;
-    currentQuestion = phraseData[Math.floor(Math.random() * phraseData.length)];
-    document.getElementById('en-text').innerText = currentQuestion.en;
-
+    const isHealWave = Math.random() < 0.15 && life < 5;
+    if(isHealWave) {
+        currentQuestion = {en: "RECOVERY ITEM", ko: "RECOVERY"};
+        document.getElementById('en-text').innerText = "♥ LIFE UP! ♥";
+        document.getElementById('en-text').style.background = "#2ecc71";
+    } else {
+        currentQuestion = phraseData[Math.floor(Math.random() * phraseData.length)];
+        document.getElementById('en-text').innerText = currentQuestion.en;
+        document.getElementById('en-text').style.background = "rgba(0, 110, 255, 0.9)";
+    }
     enemies = [];
-    let options = [currentQuestion.ko];
-    while(options.length < 3) {
-        let rand = phraseData[Math.floor(Math.random() * phraseData.length)].ko;
-        if(!options.includes(rand)) options.push(rand);
-    }
-    options.sort(() => Math.random() - 0.5);
-
-    options.forEach((opt, i) => {
-        const xPos = (canvas.width / 4) * (i + 1);
-        enemies.push(new EnemyPlane(opt, opt === currentQuestion.ko, xPos));
-    });
-}
-
-function drawPlayer() {
-    ctx.save();
-    ctx.translate(player.x, player.y);
-    player.tilt = (player.targetX - player.x) * 0.1;
-    ctx.rotate(player.tilt * Math.PI / 180);
-
-    // 전투기 몸체
-    ctx.fillStyle = '#3498db';
-    ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(-30, 20); ctx.lineTo(30, 20); ctx.closeFill; ctx.fill();
-    // 날개
-    ctx.fillStyle = '#2980b9'; ctx.fillRect(-50, 0, 100, 10);
-    // 엔진 불꽃
-    ctx.fillStyle = Math.random() > 0.5 ? '#f1c40f' : '#e67e22'; ctx.fillRect(-10, 20, 20, 15);
-    ctx.restore();
-    player.x += (player.targetX - player.x) * 0.1;
-}
-
-function createExplosion(x, y, isCorrect) {
-    // [수정] 폭발 색상도 정답/오답에 따라 분리 (노랑/강렬한 주황)
-    const color = isCorrect ? '#f39c12' : '#ff4757';
-    for(let i=0; i<15; i++) {
-        particles.push({
-            x, y,
-            vx: (Math.random()-0.5)*10,
-            vy: (Math.random()-0.5)*10,
-            life: 1.0,
-            color: color
-        });
-    }
-}
-
-function update() {
-    clouds.forEach(c => {
-        c.y += c.speed;
-        if(c.y > canvas.height) { c.y = -c.size; c.x = Math.random()*canvas.width; }
-    });
-    enemies.forEach((en, i) => {
-        en.y += en.speed;
-        if(en.y > canvas.height) {
-            if(en.isCorrect) { life--; updateLife(); spawnWave(); }
-            else enemies.splice(i, 1);
+    let opts = isHealWave ? ["RECOVERY", "MISS", "MISS"] : [currentQuestion.ko];
+    if(!isHealWave) {
+        while(opts.length < 3) {
+            let r = phraseData[Math.floor(Math.random() * phraseData.length)].ko;
+            if(!opts.includes(r)) opts.push(r);
         }
+    }
+    opts.sort(() => Math.random() - 0.5);
+    const sectors = [w * 0.18, w * 0.5, w * 0.82];
+    opts.forEach((t, i) => enemies.push(new Enemy(t, t === currentQuestion.ko, sectors[i], isHealWave && t === "RECOVERY")));
+}
+
+function loop() {
+    ctx.fillStyle = "#050810"; ctx.fillRect(0,0,w,h);
+    stars.forEach(s => {
+        ctx.fillStyle = "#ffffff44";
+        ctx.fillRect(s.x, s.y, 2, 2);
+        s.y += s.s * 6; if(s.y > h) s.y = -5;
     });
     particles.forEach((p, i) => {
-        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-        if(p.life <= 0) particles.splice(i, 1);
+        p.x += p.vx; p.y += p.vy; p.l -= 0.03;
+        ctx.globalAlpha = p.l; ctx.fillStyle = p.c;
+        ctx.fillRect(p.x, p.y, 6, 6);
+        if(p.l <= 0) particles.splice(i,1);
     });
-    if(life <= 0 && gameActive) gameOver();
-}
-
-function draw() {
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    ctx.fillStyle = 'rgba(255,255,255,0.05)';
-    clouds.forEach(c => {
-        ctx.beginPath(); ctx.arc(c.x, c.y, c.size, 0, Math.PI*2); ctx.fill();
-    });
-    enemies.forEach(en => en.draw());
-    drawPlayer();
-    particles.forEach(p => { ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); });
-    ctx.globalAlpha = 1.0;
-    update();
-    if(gameActive) requestAnimationFrame(draw);
-}
-
-function updateLife() { document.getElementById('life-board').innerText = `LIFE: ${"❤".repeat(life)}`; }
-
-function gameOver() {
-    gameActive = false;
-    document.getElementById('game-over').style.display = 'block';
-    document.getElementById('final-stats').innerText = `최종 SCORE: ${score}`;
-}
-
-// 클릭 이벤트
-canvas.addEventListener('mousedown', (e) => {
-    if(!gameActive) return;
-    const mx = e.clientX, my = e.clientY;
+    ctx.globalAlpha = 1;
     enemies.forEach((en, i) => {
-        if(mx > en.x - en.w/2 && mx < en.x + en.w/2 && my > en.y && my < en.y + en.h) {
-            createExplosion(en.x, en.y + en.h/2, en.isCorrect); // [수정] 폭발 함수에 정답 여부 전달
+        en.update(); en.draw();
+        if(en.y > h) {
+            if(en.isCorrect && !en.isHeal) { life--; updateUI(); spawn(); }
+            else enemies.splice(i,1);
+        }
+    });
+    let moveDiff = player.targetX - player.x;
+    player.tilt = moveDiff * 0.06;
+    player.x += moveDiff * 0.18;
+    if(player.recoil > 0) player.recoil -= 2;
+    ctx.save();
+    ctx.translate(player.x, player.y + player.recoil);
+    ctx.rotate(player.tilt * Math.PI / 180);
+    ctx.fillStyle = "#007aff";
+    ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(-30, 25); ctx.lineTo(30, 25); ctx.fill();
+    ctx.fillStyle = "#55aaff"; ctx.fillRect(-50, 0, 100, 10);
+    ctx.fillStyle = Math.random() > 0.5 ? "#ffae00" : "#ff4400";
+    ctx.fillRect(-12, 25, 24, 15);
+    ctx.restore();
+    if(life <= 0 && gameActive) {
+        gameActive = false;
+        document.getElementById('game-over').style.display = 'block';
+        document.getElementById('final-stats').innerText = `최종 SCORE: ${score}`;
+    }
+    if(gameActive) requestAnimationFrame(loop);
+}
+
+function updateUI() {
+    document.getElementById('score-board').innerText = "SCORE: " + score;
+    document.getElementById('life-board').innerText = "❤".repeat(Math.max(0, life));
+}
+
+function handleInput(ex, ey) {
+    if(!gameActive) return;
+    player.targetX = ex;
+    player.recoil = 18;
+    enemies.forEach((en, i) => {
+        if(ex > en.x - en.w/2 - 35 && ex < en.x + en.w/2 + 35 && ey > en.y && ey < en.y + en.h + 60) {
             if(en.isCorrect) {
-                score += 10;
-                document.getElementById('score-board').innerText = `SCORE: ${score}`;
-                spawnWave();
+                const pColor = en.isHeal ? "#2ecc71" : "#f1c40f";
+                if(en.isHeal) { if(life < 5) life++; } else { score += 10; }
+                for(let j=0; j<20; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*18, vy:(Math.random()-0.5)*18, l:1, c:pColor});
+                updateUI(); spawn();
             } else {
-                life--;
-                updateLife();
-                enemies.splice(i, 1);
+                for(let j=0; j<15; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*18, vy:(Math.random()-0.5)*18, l:1, c:"#ff4757"});
+                life--; updateUI(); enemies.splice(i,1);
             }
         }
     });
-});
+}
+
+canvas.addEventListener('touchstart', (e) => {
+    const t = e.touches[0]; handleInput(t.clientX, t.clientY);
+    e.preventDefault();
+}, {passive: false});
+canvas.addEventListener('mousedown', (e) => handleInput(e.clientX, e.clientY));
 window.addEventListener('mousemove', (e) => { player.targetX = e.clientX; });
-spawnWave();
-draw();
+
+spawn();
+loop();
 </script>
 </body>
 </html>
