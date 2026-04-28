@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile English Shooter - Classic</title>
+    <title>Mobile Shooter - Text Fixed</title>
     <style>
         body { margin: 0; background: #050810; overflow: hidden; font-family: 'Pretendard', sans-serif; touch-action: none; }
         canvas { display: block; }
         #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .hud { position: absolute; padding: 15px; color: #fff; font-weight: bold; font-size: 20px; text-shadow: 2px 2px 4px #000; }
+        .hud { position: absolute; padding: 15px; color: #fff; font-weight: bold; font-size: 18px; text-shadow: 2px 2px 4px #000; }
         #score-board { top: 5px; left: 10px; color: #f1c40f; }
-        #life-board { top: 5px; right: 10px; font-size: 20px; color: #ff4757; letter-spacing: 2px; }
-        #question-area { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); width: 95%; text-align: center; }
+        #life-board { top: 5px; right: 10px; font-size: 18px; color: #ff4757; letter-spacing: 1px; }
+        #question-area { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: 95%; text-align: center; }
         #en-text { 
-            font-size: 30px; font-weight: 900; color: #fff; background: rgba(0, 110, 255, 0.9); 
-            padding: 15px 20px; border-radius: 18px; display: inline-block; border: 2px solid #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            font-size: 26px; font-weight: 900; color: #fff; background: rgba(0, 110, 255, 0.95); 
+            padding: 12px 18px; border-radius: 15px; display: inline-block; border: 2px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); word-break: keep-all; line-height: 1.2;
         }
         #game-over {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #fff; padding: 40px; border-radius: 20px; text-align: center; display: none; pointer-events: auto; width: 80%;
+            background: #fff; padding: 30px; border-radius: 20px; text-align: center; display: none; pointer-events: auto; width: 75%;
         }
-        button { padding: 18px 35px; font-size: 24px; background: #007aff; color: #fff; border: none; border-radius: 12px; font-weight: bold; }
+        button { padding: 15px 30px; font-size: 22px; background: #007aff; color: #fff; border: none; border-radius: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -33,16 +33,15 @@
     <div id="life-board" class="hud">❤❤❤❤❤</div>
     <div id="question-area"><div id="en-text">READY?</div></div>
     <div id="game-over">
-        <h1 style="color:#333">MISSION FAILED</h1>
-        <p id="final-stats" style="font-size: 22px; color: #666;"></p>
+        <h1 style="color:#333; margin-top:0;">GAME OVER</h1>
+        <p id="final-stats" style="font-size: 20px; color: #666; margin-bottom:20px;"></p>
         <button onclick="location.reload()">다시 시작</button>
     </div>
 </div>
 
 <script>
-// 데이터셋 (201-300번 구문)
 const phraseData = [
-    { "en": "attribute A to B", "ko": "A를 B의 탓(덕분)으로 돌리다" },
+   { "en": "attribute A to B", "ko": "A를 B의 탓(덕분)으로 돌리다" },
   { "en": "ascribe A to B", "ko": "A를 B의 결과로 여기다" },
   { "en": "distinguish A from B", "ko": "A와 B를 구별하다" },
   { "en": "differentiate A from B", "ko": "A를 B와 차별화하다" },
@@ -155,33 +154,65 @@ let score = 0, life = 5, gameActive = true, currentQuestion = null;
 let enemies = [], particles = [], stars = [];
 let player = { x: w / 2, y: h - 110, targetX: w / 2, tilt: 0, recoil: 0 };
 
-// 배경 별 가속 효과
-for(let i=0; i<25; i++) stars.push({ x: Math.random()*w, y: Math.random()*h, s: Math.random()*2+1 });
+for(let i=0; i<20; i++) stars.push({ x: Math.random()*w, y: Math.random()*h, s: Math.random()*2+1 });
 
 class Enemy {
     constructor(text, isCorrect, xPos) {
         this.text = text; this.isCorrect = isCorrect;
         this.x = xPos; this.y = -150;
-        this.w = w * 0.28; this.h = 85;
-        this.speed = 2.8 + (score / 150);
+        this.w = w * 0.3; // 박스 너비 살짝 확대
+        this.h = 95;      // 박스 높이 확대
+        this.speed = 2.3 + (score / 200);
     }
+
+    // 텍스트 줄바꿈 함수
+    wrapText(context, text, maxWidth) {
+        let words = text.split(" ");
+        let lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            let word = words[i];
+            let width = context.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) {
+                currentLine += " " + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
+    }
+
     draw() {
         ctx.save();
         ctx.translate(this.x, this.y);
-        ctx.fillStyle = "#fff"; // 모든 적기 흰색 통일
+        ctx.fillStyle = "#fff";
         
-        // 기체 드로잉
-        ctx.beginPath(); ctx.ellipse(-25, 0, 8, 22, 0, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(25, 0, 8, 22, 0, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.roundRect(-this.w/2, 10, this.w, this.h, 15); ctx.fill();
-        
-        ctx.fillStyle = "#000";
-        ctx.font = "bold 19px Pretendard";
+        // 기체 몸체
+        ctx.beginPath(); ctx.roundRect(-this.w/2, 0, this.w, this.h, 12); ctx.fill();
+        // 바퀴/날개 장식
+        ctx.fillStyle = "#dfe6e9";
+        ctx.beginPath(); ctx.ellipse(-this.w/2, 20, 8, 20, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(this.w/2, 20, 8, 20, 0, 0, Math.PI*2); ctx.fill();
+
+        // 텍스트 그리기
         ctx.textAlign = "center";
-        if(this.text.length > 7) {
-            ctx.fillText(this.text.substring(0, 7), 0, 50);
-            ctx.fillText(this.text.substring(7), 0, 75);
-        } else { ctx.fillText(this.text, 0, 65); }
+        let fontSize = 18;
+        if(this.text.length > 10) fontSize = 15; // 글자 많으면 폰트 축소
+        
+        ctx.font = `bold ${fontSize}px Pretendard`;
+        ctx.fillStyle = "#000";
+
+        const lines = this.wrapText(ctx, this.text, this.w - 15);
+        const lineHeight = fontSize + 4;
+        const startY = (this.h / 2) - ((lines.length - 1) * lineHeight / 2) + 5;
+
+        lines.forEach((line, i) => {
+            ctx.fillText(line, 0, startY + (i * lineHeight));
+        });
+
         ctx.restore();
     }
     update() { this.y += this.speed; }
@@ -192,63 +223,71 @@ function spawn() {
     currentQuestion = phraseData[Math.floor(Math.random() * phraseData.length)];
     document.getElementById('en-text').innerText = currentQuestion.en;
     
-    enemies = [];
-    let opts = [currentQuestion.ko];
-    while(opts.length < 3) {
-        let r = phraseData[Math.floor(Math.random() * phraseData.length)].ko;
-        if(!opts.includes(r)) opts.push(r);
-    }
+    let others = phraseData.filter(item => item.ko !== currentQuestion.ko);
+    others.sort(() => Math.random() - 0.5);
+    
+    let opts = [
+        { text: currentQuestion.ko, isCorrect: true },
+        { text: others[0].ko, isCorrect: false },
+        { text: others[1].ko, isCorrect: false }
+    ];
     opts.sort(() => Math.random() - 0.5);
+
+    enemies = [];
     const sectors = [w * 0.18, w * 0.5, w * 0.82];
-    opts.forEach((t, i) => enemies.push(new Enemy(t, t === currentQuestion.ko, sectors[i])));
+    opts.forEach((opt, i) => {
+        enemies.push(new Enemy(opt.text, opt.isCorrect, sectors[i]));
+    });
 }
 
 function loop() {
+    if(!gameActive) return;
     ctx.fillStyle = "#050810"; ctx.fillRect(0,0,w,h);
     
     stars.forEach(s => {
-        ctx.fillStyle = "#ffffff44";
+        ctx.fillStyle = "#ffffff33";
         ctx.fillRect(s.x, s.y, 2, 2);
-        s.y += s.s * 6; if(s.y > h) s.y = -5;
+        s.y += s.s * 5; if(s.y > h) s.y = -5;
     });
 
     particles.forEach((p, i) => {
         p.x += p.vx; p.y += p.vy; p.l -= 0.03;
         ctx.globalAlpha = p.l; ctx.fillStyle = p.c;
-        ctx.fillRect(p.x, p.y, 6, 6);
+        ctx.fillRect(p.x, p.y, 5, 5);
         if(p.l <= 0) particles.splice(i,1);
     });
     ctx.globalAlpha = 1;
 
-    enemies.forEach((en, i) => {
+    for(let i = enemies.length - 1; i >= 0; i--) {
+        let en = enemies[i];
         en.update(); en.draw();
         if(en.y > h) {
-            if(en.isCorrect) { life--; updateUI(); spawn(); }
-            else enemies.splice(i,1);
+            if(en.isCorrect) { life--; updateUI(); if(life > 0) spawn(); }
+            enemies.splice(i, 1);
+            if(enemies.length === 0 && gameActive) spawn();
         }
-    });
+    }
 
     let moveDiff = player.targetX - player.x;
     player.tilt = moveDiff * 0.06;
-    player.x += moveDiff * 0.18;
+    player.x += moveDiff * 0.2;
     if(player.recoil > 0) player.recoil -= 2;
 
     ctx.save();
     ctx.translate(player.x, player.y + player.recoil);
     ctx.rotate(player.tilt * Math.PI / 180);
     ctx.fillStyle = "#007aff";
-    ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(-30, 25); ctx.lineTo(30, 25); ctx.fill();
-    ctx.fillStyle = "#55aaff"; ctx.fillRect(-50, 0, 100, 10);
+    ctx.beginPath(); ctx.moveTo(0, -35); ctx.lineTo(-30, 20); ctx.lineTo(30, 20); ctx.fill();
+    ctx.fillStyle = "#55aaff"; ctx.fillRect(-45, 0, 90, 8);
     ctx.fillStyle = Math.random() > 0.5 ? "#ffae00" : "#ff4400";
-    ctx.fillRect(-12, 25, 24, 15);
+    ctx.fillRect(-10, 20, 20, 15);
     ctx.restore();
 
-    if(life <= 0 && gameActive) {
+    if(life <= 0) {
         gameActive = false;
         document.getElementById('game-over').style.display = 'block';
-        document.getElementById('final-stats').innerText = `최종 SCORE: ${score}`;
-    }
-    if(gameActive) requestAnimationFrame(loop);
+        document.getElementById('final-stats').innerText = `SCORE: ${score}`;
+    } else { requestAnimationFrame(loop); }
 }
 
 function updateUI() {
@@ -259,19 +298,23 @@ function updateUI() {
 function handleInput(ex, ey) {
     if(!gameActive) return;
     player.targetX = ex;
-    player.recoil = 18;
-    enemies.forEach((en, i) => {
-        if(ex > en.x - en.w/2 - 35 && ex < en.x + en.w/2 + 35 && ey > en.y && ey < en.y + en.h + 60) {
+    player.recoil = 15;
+    for(let i = enemies.length - 1; i >= 0; i--) {
+        let en = enemies[i];
+        if(ex > en.x - en.w/2 - 20 && ex < en.x + en.w/2 + 20 && ey > en.y && ey < en.y + en.h + 30) {
             if(en.isCorrect) {
                 score += 10;
-                for(let j=0; j<20; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*18, vy:(Math.random()-0.5)*18, l:1, c:"#f1c40f"});
+                for(let j=0; j<15; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*15, vy:(Math.random()-0.5)*15, l:1, c:"#f1c40f"});
                 updateUI(); spawn();
             } else {
-                for(let j=0; j<15; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*18, vy:(Math.random()-0.5)*18, l:1, c:"#ff4757"});
-                life--; updateUI(); enemies.splice(i,1);
+                life--;
+                for(let j=0; j<15; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*15, vy:(Math.random()-0.5)*15, l:1, c:"#ff4757"});
+                updateUI(); enemies.splice(i, 1);
+                if(enemies.length === 0) spawn();
             }
+            break;
         }
-    });
+    }
 }
 
 canvas.addEventListener('touchstart', (e) => {
