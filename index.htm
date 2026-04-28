@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Ultimate Shooter</title>
+    <title>Mobile English Shooter - Classic</title>
     <style>
         body { margin: 0; background: #050810; overflow: hidden; font-family: 'Pretendard', sans-serif; touch-action: none; }
         canvas { display: block; }
@@ -13,7 +13,7 @@
         #life-board { top: 5px; right: 10px; font-size: 20px; color: #ff4757; letter-spacing: 2px; }
         #question-area { position: absolute; top: 65px; left: 50%; transform: translateX(-50%); width: 95%; text-align: center; }
         #en-text { 
-            font-size: 32px; font-weight: 900; color: #fff; background: rgba(0, 110, 255, 0.9); 
+            font-size: 30px; font-weight: 900; color: #fff; background: rgba(0, 110, 255, 0.9); 
             padding: 15px 20px; border-radius: 18px; display: inline-block; border: 2px solid #fff;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
@@ -40,7 +40,7 @@
 </div>
 
 <script>
-// 데이터 (모바일 가독성을 위해 뜻을 간결하게 유지)
+// 데이터셋 (201-300번 구문)
 const phraseData = [
     { "en": "attribute A to B", "ko": "A를 B의 탓(덕분)으로 돌리다" },
   { "en": "ascribe A to B", "ko": "A를 B의 결과로 여기다" },
@@ -155,11 +155,12 @@ let score = 0, life = 5, gameActive = true, currentQuestion = null;
 let enemies = [], particles = [], stars = [];
 let player = { x: w / 2, y: h - 110, targetX: w / 2, tilt: 0, recoil: 0 };
 
+// 배경 별 가속 효과
 for(let i=0; i<25; i++) stars.push({ x: Math.random()*w, y: Math.random()*h, s: Math.random()*2+1 });
 
 class Enemy {
-    constructor(text, isCorrect, xPos, isHeal = false) {
-        this.text = text; this.isCorrect = isCorrect; this.isHeal = isHeal;
+    constructor(text, isCorrect, xPos) {
+        this.text = text; this.isCorrect = isCorrect;
         this.x = xPos; this.y = -150;
         this.w = w * 0.28; this.h = 85;
         this.speed = 2.8 + (score / 150);
@@ -167,13 +168,14 @@ class Enemy {
     draw() {
         ctx.save();
         ctx.translate(this.x, this.y);
-        ctx.fillStyle = this.isHeal ? "#2ecc71" : "#fff";
-        // 비행기(자동차) 모양 그리기
+        ctx.fillStyle = "#fff"; // 모든 적기 흰색 통일
+        
+        // 기체 드로잉
         ctx.beginPath(); ctx.ellipse(-25, 0, 8, 22, 0, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.ellipse(25, 0, 8, 22, 0, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.roundRect(-this.w/2, 10, this.w, this.h, 15); ctx.fill();
         
-        ctx.fillStyle = this.isHeal ? "#fff" : "#000";
+        ctx.fillStyle = "#000";
         ctx.font = "bold 19px Pretendard";
         ctx.textAlign = "center";
         if(this.text.length > 7) {
@@ -187,36 +189,29 @@ class Enemy {
 
 function spawn() {
     if(!gameActive) return;
-    const isHealWave = Math.random() < 0.15 && life < 5;
-    if(isHealWave) {
-        currentQuestion = {en: "RECOVERY ITEM", ko: "RECOVERY"};
-        document.getElementById('en-text').innerText = "♥ LIFE UP! ♥";
-        document.getElementById('en-text').style.background = "#2ecc71";
-    } else {
-        currentQuestion = phraseData[Math.floor(Math.random() * phraseData.length)];
-        document.getElementById('en-text').innerText = currentQuestion.en;
-        document.getElementById('en-text').style.background = "rgba(0, 110, 255, 0.9)";
-    }
+    currentQuestion = phraseData[Math.floor(Math.random() * phraseData.length)];
+    document.getElementById('en-text').innerText = currentQuestion.en;
+    
     enemies = [];
-    let opts = isHealWave ? ["RECOVERY", "MISS", "MISS"] : [currentQuestion.ko];
-    if(!isHealWave) {
-        while(opts.length < 3) {
-            let r = phraseData[Math.floor(Math.random() * phraseData.length)].ko;
-            if(!opts.includes(r)) opts.push(r);
-        }
+    let opts = [currentQuestion.ko];
+    while(opts.length < 3) {
+        let r = phraseData[Math.floor(Math.random() * phraseData.length)].ko;
+        if(!opts.includes(r)) opts.push(r);
     }
     opts.sort(() => Math.random() - 0.5);
     const sectors = [w * 0.18, w * 0.5, w * 0.82];
-    opts.forEach((t, i) => enemies.push(new Enemy(t, t === currentQuestion.ko, sectors[i], isHealWave && t === "RECOVERY")));
+    opts.forEach((t, i) => enemies.push(new Enemy(t, t === currentQuestion.ko, sectors[i])));
 }
 
 function loop() {
     ctx.fillStyle = "#050810"; ctx.fillRect(0,0,w,h);
+    
     stars.forEach(s => {
         ctx.fillStyle = "#ffffff44";
         ctx.fillRect(s.x, s.y, 2, 2);
         s.y += s.s * 6; if(s.y > h) s.y = -5;
     });
+
     particles.forEach((p, i) => {
         p.x += p.vx; p.y += p.vy; p.l -= 0.03;
         ctx.globalAlpha = p.l; ctx.fillStyle = p.c;
@@ -224,17 +219,20 @@ function loop() {
         if(p.l <= 0) particles.splice(i,1);
     });
     ctx.globalAlpha = 1;
+
     enemies.forEach((en, i) => {
         en.update(); en.draw();
         if(en.y > h) {
-            if(en.isCorrect && !en.isHeal) { life--; updateUI(); spawn(); }
+            if(en.isCorrect) { life--; updateUI(); spawn(); }
             else enemies.splice(i,1);
         }
     });
+
     let moveDiff = player.targetX - player.x;
     player.tilt = moveDiff * 0.06;
     player.x += moveDiff * 0.18;
     if(player.recoil > 0) player.recoil -= 2;
+
     ctx.save();
     ctx.translate(player.x, player.y + player.recoil);
     ctx.rotate(player.tilt * Math.PI / 180);
@@ -244,6 +242,7 @@ function loop() {
     ctx.fillStyle = Math.random() > 0.5 ? "#ffae00" : "#ff4400";
     ctx.fillRect(-12, 25, 24, 15);
     ctx.restore();
+
     if(life <= 0 && gameActive) {
         gameActive = false;
         document.getElementById('game-over').style.display = 'block';
@@ -264,9 +263,8 @@ function handleInput(ex, ey) {
     enemies.forEach((en, i) => {
         if(ex > en.x - en.w/2 - 35 && ex < en.x + en.w/2 + 35 && ey > en.y && ey < en.y + en.h + 60) {
             if(en.isCorrect) {
-                const pColor = en.isHeal ? "#2ecc71" : "#f1c40f";
-                if(en.isHeal) { if(life < 5) life++; } else { score += 10; }
-                for(let j=0; j<20; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*18, vy:(Math.random()-0.5)*18, l:1, c:pColor});
+                score += 10;
+                for(let j=0; j<20; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*18, vy:(Math.random()-0.5)*18, l:1, c:"#f1c40f"});
                 updateUI(); spawn();
             } else {
                 for(let j=0; j<15; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*18, vy:(Math.random()-0.5)*18, l:1, c:"#ff4757"});
