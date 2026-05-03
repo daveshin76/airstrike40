@@ -1,971 +1,343 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>가온중학교 2학년 중간고사 분석 보고서</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --navy: #0f1f3d;
-    --navy-mid: #1a3160;
-    --blue: #1e4db7;
-    --blue-light: #3a6fd8;
-    --accent: #e8a020;
-    --accent-light: #f5c355;
-    --red: #c0392b;
-    --green: #1a7a4a;
-    --bg: #f7f5f0;
-    --bg-card: #ffffff;
-    --text: #1a1a2e;
-    --text-mid: #3d3d5c;
-    --text-light: #6b6b8a;
-    --border: #e2ddd5;
-    --shadow: 0 4px 24px rgba(15,31,61,0.08);
-    --shadow-lg: 0 12px 48px rgba(15,31,61,0.14);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.7;
-    font-size: 15px;
-  }
-
-  /* ── HERO ── */
-  .hero {
-    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1e3a7a 100%);
-    color: white;
-    padding: 64px 40px 56px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -80px; right: -80px;
-    width: 360px; height: 360px;
-    border-radius: 50%;
-    background: rgba(232,160,32,0.12);
-    pointer-events: none;
-  }
-  .hero::after {
-    content: '';
-    position: absolute;
-    bottom: -60px; left: 40%;
-    width: 240px; height: 240px;
-    border-radius: 50%;
-    background: rgba(58,111,216,0.15);
-    pointer-events: none;
-  }
-
-  .hero-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
-
-  .hero-badge {
-    display: inline-block;
-    background: rgba(232,160,32,0.22);
-    border: 1px solid rgba(232,160,32,0.5);
-    color: var(--accent-light);
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 5px 14px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-  }
-
-  .hero h1 {
-    font-family: 'Noto Serif KR', serif;
-    font-size: clamp(26px, 4vw, 38px);
-    font-weight: 700;
-    line-height: 1.25;
-    margin-bottom: 10px;
-    letter-spacing: -0.5px;
-  }
-
-  .hero-sub {
-    font-size: 14px;
-    color: rgba(255,255,255,0.6);
-    letter-spacing: 1px;
-    margin-bottom: 36px;
-  }
-
-  .hero-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .stat-box {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    padding: 16px 24px;
-    min-width: 130px;
-    backdrop-filter: blur(4px);
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-
-  .stat-value {
-    font-family: 'DM Serif Display', serif;
-    font-size: 28px;
-    color: white;
-    line-height: 1;
-  }
-
-  .stat-value small {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.7);
-    margin-left: 2px;
-  }
-
-  .difficulty-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(192,57,43,0.25);
-    border: 1px solid rgba(192,57,43,0.5);
-    color: #ff8a7a;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 8px 18px;
-    border-radius: 6px;
-  }
-
-  /* ── LAYOUT ── */
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 48px 24px;
-  }
-
-  /* ── SECTION TITLES ── */
-  .section-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 28px;
-    margin-top: 52px;
-  }
-
-  .section-title:first-child { margin-top: 0; }
-
-  .section-num {
-    width: 36px; height: 36px;
-    background: var(--navy);
-    color: white;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'DM Serif Display', serif;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-
-  .section-title h2 {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--navy);
-    letter-spacing: -0.3px;
-  }
-
-  .section-title .section-desc {
-    font-size: 12.5px;
-    color: var(--text-light);
-    margin-top: 1px;
-  }
-
-  /* ── SUMMARY CARD ── */
-  .summary-card {
-    background: var(--navy);
-    border-radius: 14px;
-    padding: 28px 32px;
-    color: white;
-    margin-bottom: 32px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .summary-card::before {
-    content: '총평';
-    position: absolute;
-    right: 28px; top: 20px;
-    font-family: 'DM Serif Display', serif;
-    font-size: 64px;
-    color: rgba(255,255,255,0.05);
-    pointer-events: none;
-    line-height: 1;
-  }
-
-  .summary-card p {
-    font-size: 14.5px;
-    line-height: 1.8;
-    color: rgba(255,255,255,0.88);
-  }
-
-  .summary-card strong {
-    color: var(--accent-light);
-  }
-
-  /* ── GRAMMAR CARDS ── */
-  .grammar-grid {
-    display: grid;
-    gap: 20px;
-  }
-
-  .grammar-card {
-    background: var(--bg-card);
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: box-shadow 0.2s;
-  }
-
-  .grammar-card:hover { box-shadow: var(--shadow-lg); }
-
-  .grammar-header {
-    padding: 18px 24px 16px;
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .grammar-icon {
-    width: 42px; height: 42px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 19px;
-    flex-shrink: 0;
-  }
-
-  .icon-blue  { background: #dbeafe; }
-  .icon-amber { background: #fef3c7; }
-  .icon-green { background: #d1fae5; }
-
-  .grammar-title {
-    flex: 1;
-  }
-
-  .grammar-title h3 {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 3px;
-  }
-
-  .grammar-title .sub {
-    font-size: 12px;
-    color: var(--text-light);
-  }
-
-  .problem-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
-  }
-
-  .tag {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 4px;
-    letter-spacing: 0.3px;
-  }
-
-  .tag-red { background: #fde8e8; color: #c0392b; }
-  .tag-blue { background: #dbeafe; color: #1e40af; }
-  .tag-gray { background: #f0f0f5; color: #555; }
-
-  .grammar-body { padding: 20px 24px; }
-
-  .trap-box {
-    background: #fffbeb;
-    border-left: 3px solid var(--accent);
-    border-radius: 0 8px 8px 0;
-    padding: 12px 16px;
-    margin-bottom: 14px;
-    font-size: 13.5px;
-  }
-
-  .trap-box .trap-label {
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 5px;
-  }
-
-  .mistake-box {
-    background: #fef2f2;
-    border-left: 3px solid #e74c3c;
-    border-radius: 0 8px 8px 0;
-    padding: 12px 16px;
-    font-size: 13.5px;
-  }
-
-  .mistake-box .mistake-label {
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: #c0392b;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-  }
-
-  /* ── EXAMPLE PROBLEMS ── */
-  .example-card {
-    background: var(--bg-card);
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-
-  .example-header {
-    background: var(--navy);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .example-header span {
-    color: rgba(255,255,255,0.5);
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .example-header h3 {
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-  }
-
-  .example-note {
-    background: #f0f4ff;
-    border-bottom: 1px solid #dce6ff;
-    padding: 10px 24px;
-    font-size: 12px;
-    color: #4a5a8a;
-  }
-
-  .problem-item {
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .problem-item:last-child { border-bottom: none; }
-
-  .problem-sentence {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 14.5px;
-    color: var(--text);
-    margin-bottom: 10px;
-    background: #f8f8fb;
-    padding: 10px 14px;
-    border-radius: 6px;
-    border: 1px solid #e8e8f0;
-  }
-
-  .correct { color: var(--green); }
-  .wrong   { color: var(--red); text-decoration: line-through; opacity: 0.6; }
-
-  .analysis-text {
-    font-size: 13px;
-    color: var(--text-mid);
-    display: flex;
-    gap: 8px;
-  }
-
-  .analysis-text::before {
-    content: '▶';
-    color: var(--blue);
-    font-size: 10px;
-    margin-top: 3px;
-    flex-shrink: 0;
-  }
-
-  /* ── QUESTION TABLE ── */
-  .type-table-wrap {
-    background: var(--bg-card);
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-
-  .type-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13.5px;
-  }
-
-  .type-table thead tr {
-    background: var(--navy);
-    color: white;
-  }
-
-  .type-table th {
-    padding: 13px 18px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 0.5px;
-  }
-
-  .type-table td {
-    padding: 11px 18px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text-mid);
-  }
-
-  .type-table tr:last-child td { border-bottom: none; }
-
-  .type-table tr:nth-child(even) td { background: #fafaf8; }
-
-  .type-table td:first-child {
-    font-weight: 700;
-    color: var(--navy);
-    white-space: nowrap;
-    width: 70px;
-  }
-
-  .grammar-mark {
-    display: inline-block;
-    width: 8px; height: 8px;
-    background: var(--accent);
-    border-radius: 2px;
-    margin-right: 6px;
-    vertical-align: middle;
-  }
-
-  /* ── DIFFICULTY CHIPS ── */
-  .difficulty-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 12px;
-  }
-
-  .diff-chip {
-    padding: 7px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    border: 1.5px solid;
-  }
-
-  .diff-hard {
-    background: #fff0ee;
-    border-color: #e74c3c;
-    color: #c0392b;
-  }
-
-  .diff-mid {
-    background: #fff9ee;
-    border-color: #e8a020;
-    color: #a06010;
-  }
-
-  /* ── NEXT SECTION ── */
-  .next-card {
-    background: linear-gradient(135deg, #0f1f3d, #1a3a6a);
-    border-radius: 14px;
-    padding: 32px;
-    color: white;
-    margin-top: 12px;
-  }
-
-  .next-card h3 {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 17px;
-    font-weight: 700;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .next-tag {
-    background: rgba(232,160,32,0.25);
-    border: 1px solid rgba(232,160,32,0.4);
-    color: #f5c355;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    padding: 2px 8px;
-    border-radius: 3px;
-    text-transform: uppercase;
-  }
-
-  .next-item {
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    display: flex;
-    gap: 14px;
-  }
-
-  .next-item:last-child { border-bottom: none; padding-bottom: 0; }
-
-  .next-dot {
-    width: 6px; height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    margin-top: 8px;
-    flex-shrink: 0;
-  }
-
-  .next-item-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.9);
-    margin-bottom: 4px;
-  }
-
-  .next-item-desc {
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-    line-height: 1.6;
-  }
-
-  /* ── FOOTER ── */
-  .footer {
-    text-align: center;
-    padding: 32px 24px;
-    color: var(--text-light);
-    font-size: 12px;
-    border-top: 1px solid var(--border);
-    margin-top: 24px;
-  }
-
-  @media (max-width: 600px) {
-    .hero { padding: 44px 20px 40px; }
-    .hero-stats { gap: 10px; }
-    .stat-box { min-width: 100px; padding: 12px 16px; }
-    .container { padding: 32px 16px; }
-    .grammar-body { padding: 16px 18px; }
-    .type-table th, .type-table td { padding: 10px 12px; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Action Shooter - Menu System</title>
+    <style>
+        body { margin: 0; background: #050810; overflow: hidden; font-family: 'Pretendard', sans-serif; touch-action: none; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .hud { position: absolute; padding: 15px; color: #fff; font-weight: bold; font-size: 18px; text-shadow: 2px 2px 4px #000; }
+        #score-board { top: 5px; left: 10px; color: #f1c40f; }
+        #life-board { top: 5px; right: 10px; font-size: 18px; color: #ff4757; letter-spacing: 1px; }
+        
+        /* 홈 버튼 (게임 중 상단) */
+        #home-btn { 
+            position: absolute; top: 50px; left: 15px; font-size: 24px; color: rgba(255,255,255,0.5); 
+            pointer-events: auto; cursor: pointer; display: none;
+        }
+
+        .overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 20px; 
+            text-align: center; pointer-events: auto; width: 80%; max-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 122, 255, 0.3);
+        }
+        h1 { color: #333; margin-top: 0; font-size: 24px; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        button { 
+            padding: 15px; font-size: 18px; border: none; border-radius: 12px; 
+            font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .btn-easy { background: #2ecc71; color: white; }
+        .btn-normal { background: #007aff; color: white; }
+        .btn-hard { background: #e74c3c; color: white; }
+        .btn-menu { background: #636e72; color: white; margin-top: 10px; }
+        
+        #question-area { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: 95%; text-align: center; display: none; }
+        #en-text { 
+            font-size: 26px; font-weight: 900; color: #fff; background: rgba(0, 110, 255, 0.95); 
+            padding: 12px 18px; border-radius: 15px; display: inline-block; border: 2px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); word-break: keep-all; line-height: 1.2;
+        }
+    </style>
 </head>
 <body>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-inner">
-    <div class="hero-badge">2026 · 1학기</div>
-    <h1>가온중학교 2학년<br>중간고사 분석 보고서</h1>
-    <p class="hero-sub">학생 · 학부모 안내용 | 영어과</p>
+<canvas id="gameCanvas"></canvas>
 
-    <div class="hero-stats">
-      <div class="stat-box">
-        <div class="stat-label">총 문항</div>
-        <div class="stat-value">28<small>문항</small></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">객관식</div>
-        <div class="stat-value">25<small>문제</small></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">서술형</div>
-        <div class="stat-value">3<small>문제</small></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">어법 비중</div>
-        <div class="stat-value">28<small>%</small></div>
-      </div>
-      <div class="stat-box" style="border-color:rgba(192,57,43,0.4); background:rgba(192,57,43,0.15);">
-        <div class="stat-label">난이도</div>
-        <div class="stat-value" style="font-size:22px; padding-top:4px;">🔴 상</div>
-      </div>
+<div id="ui">
+    <div id="home-btn" onclick="backToMenu()">🏠</div>
+
+    <div id="start-menu" class="overlay">
+        <h1>난이도 선택</h1>
+        <div class="btn-group">
+            <button class="btn-easy" onclick="startGame(1.5)">쉬움 (천천히)</button>
+            <button class="btn-normal" onclick="startGame(2.5)">보통 (표준)</button>
+            <button class="btn-hard" onclick="startGame(4.0)">어려움 (매우 빠름)</button>
+        </div>
     </div>
-  </div>
+
+    <div id="score-board" class="hud" style="display:none">SCORE: 0</div>
+    <div id="life-board" class="hud" style="display:none">❤❤❤❤❤</div>
+    
+    <div id="question-area"><div id="en-text">READY?</div></div>
+    
+    <div id="game-over" class="overlay" style="display:none">
+        <h1 style="color:#e74c3c">GAME OVER</h1>
+        <p id="final-stats" style="font-size: 20px; color: #666; margin-bottom:20px;"></p>
+        <button class="btn-normal" style="width:100%" onclick="retryGame()">다시 도전</button>
+        <button class="btn-menu" style="width:100%" onclick="backToMenu()">메인 메뉴로</button>
+    </div>
 </div>
 
-<div class="container">
+<script>
+const phraseData = [
+    { "en": "attribute A to B", "ko": "A를 B의 탓(덕분)으로 돌리다" },
+  { "en": "ascribe A to B", "ko": "A를 B의 결과로 여기다" },
+  { "en": "distinguish A from B", "ko": "A와 B를 구별하다" },
+  { "en": "differentiate A from B", "ko": "A를 B와 차별화하다" },
+  { "en": "keep A from -ing", "ko": "A가 ~하는 것을 막다/방해하다" },
+  { "en": "prevent A from -ing", "ko": "A가 ~하지 못하게 예방하다" },
+  { "en": "prohibit A from -ing", "ko": "A가 ~하는 것을 금지하다" },
+  { "en": "take A into account", "ko": "A를 고려하다" },
+  { "en": "take A for granted", "ko": "A를 당연하게 여기다" },
+  { "en": "provide A with B", "ko": "A에게 B를 제공하다" },
+  { "en": "present A with B", "ko": "A에게 B를 제시/증정하다" },
+  { "en": "devote A to B", "ko": "A를 B에 바치다/전념하다" },
+  { "en": "commit oneself to N", "ko": "~에 전념하다/약속하다" },
+  { "en": "remind A of B", "ko": "A에게 B를 상기시키다" },
+  { "en": "inform A of B", "ko": "A에게 B를 알리다" },
+  { "en": "accuse A of B", "ko": "A를 B의 혐의로 비난/고발하다" },
+  { "en": "deprive A of B", "ko": "A에게서 B를 박탈하다" },
+  { "en": "rob A of B", "ko": "A에게서 B를 강탈하다" },
+  { "en": "replace A with B", "ko": "A를 B로 교체하다" },
+  { "en": "substitute A for B", "ko": "B 대신 A를 쓰다 (A로 대체하다)" },
+  { "en": "refer to A as B", "ko": "A를 B라고 부르다/언급하다" },
+  { "en": "regard A as B", "ko": "A를 B로 간주하다" },
+  { "en": "view A as B", "ko": "A를 B라고 보다" },
+  { "en": "transform A into B", "ko": "A를 B로 변형시키다" },
+  { "en": "translate A into B", "ko": "A를 B로 번역/해석하다" },
+  { "en": "impose A on B", "ko": "A를 B에게 부과/강요하다" },
+  { "en": "congratulate A on B", "ko": "A에게 B에 대해 축하하다" },
+  { "en": "base A on B", "ko": "A를 B에 근거를 두다" },
+  { "en": "blame A for B", "ko": "B에 대해 A를 비난하다" },
+  { "en": "exchange A for B", "ko": "A를 B와 교환하다" },
+  { "en": "mistake A for B", "ko": "A를 B로 오해/착각하다" },
+  { "en": "warn A of B", "ko": "A에게 B를 경고하다" },
+  { "en": "protect A from B", "ko": "A를 B로부터 보호하다" },
+  { "en": "derive A from B", "ko": "B에서 A를 이끌어내다/유래하다" },
+  { "en": "owe A to B", "ko": "A는 B 덕분이다" },
+  { "en": "relieve A of B", "ko": "A에게서 B(부담 등)를 덜어주다" },
+  { "en": "clear A of B", "ko": "A에게서 B(혐의 등)를 벗겨주다" },
+  { "en": "share A with B", "ko": "A를 B와 공유하다" },
+  { "en": "associate A with B", "ko": "A를 B와 연관시키다" },
+  { "en": "identify A with B", "ko": "A와 B를 동일시하다" },
+  { "en": "equate A with B", "ko": "A와 B를 동등하게 생각하다" },
+  { "en": "charge A with B", "ko": "A를 B의 혐의로 기소/책임을 맡기다" },
+  { "en": "compare A to B", "ko": "A를 B에 비유하다" },
+  { "en": "compare A with B", "ko": "A와 B를 비교하다" },
+  { "en": "adapt A to B", "ko": "A를 B에 적응/맞추다" },
+  { "en": "attach A to B", "ko": "A를 B에 붙이다/첨부하다" },
+  { "en": "confine A to B", "ko": "A를 B에 국한시키다/가두다" },
+  { "en": "entitle A to B", "ko": "A에게 B의 자격을 주다" },
+  { "en": "expose A to B", "ko": "A를 B에 노출시키다" },
+  { "en": "add A to B", "ko": "A를 B에 더하다" },
+  { "en": "depend on / rely on", "ko": "~에 의존하다/달려있다" },
+  { "en": "count on", "ko": "~을 믿다/기대다" },
+  { "en": "resort to N", "ko": "(최후의 수단으로) ~에 호소하다" },
+  { "en": "contribute to N", "ko": "~에 기여하다/원인이 되다" },
+  { "en": "lead to N", "ko": "~로 이어지다/야기하다" },
+  { "en": "result in", "ko": "~한 결과를 낳다" },
+  { "en": "result from", "ko": "~에서 기인하다 (원인)" },
+  { "en": "consist of", "ko": "~로 구성되다" },
+  { "en": "consist in", "ko": "~에 (본질이) 있다" },
+  { "en": "comply with", "ko": "~을 준수하다/따르다" },
+  { "en": "conform to", "ko": "~에 순응하다/일치하다" },
+  { "en": "interfere with", "ko": "~을 방해하다/간섭하다" },
+  { "en": "cope with / deal with", "ko": "~에 대처하다/다루다" },
+  { "en": "object to -ing/N", "ko": "~에 반대하다" },
+  { "en": "participate in", "ko": "~에 참여하다" },
+  { "en": "specialize in", "ko": "~을 전문으로 하다" },
+  { "en": "succeed in", "ko": "~에 성공하다" },
+  { "en": "succeed to N", "ko": "~을 계승하다" },
+  { "en": "apologize to A for B", "ko": "A에게 B에 대해 사과하다" },
+  { "en": "belong to N", "ko": "~에 속하다" },
+  { "en": "respond to / react to", "ko": "~에 반응하다/응답하다" },
+  { "en": "subscribe to N", "ko": "~을 구독하다/동의하다" },
+  { "en": "accustom oneself to N", "ko": "~에 익숙해지다" },
+  { "en": "amount to N", "ko": "(합계가) ~에 이르다 / ~와 마찬가지다" },
+  { "en": "appeal to N", "ko": "~에 호소하다 / 매력이 있다" },
+  { "en": "apply for", "ko": "~에 지원/신청하다" },
+  { "en": "apply to N", "ko": "~에 적용되다" },
+  { "en": "care for", "ko": "~을 돌보다 / 좋아하다" },
+  { "en": "complain about", "ko": "~에 대해 불평하다" },
+  { "en": "concentrate on / focus on", "ko": "~에 집중하다" },
+  { "en": "coincide with", "ko": "~와 동시에 일어나다/일치하다" },
+  { "en": "collide with", "ko": "~와 충돌하다" },
+  { "en": "depart from", "ko": "~에서 떠나다/벗어나다" },
+  { "en": "dispose of", "ko": "~을 처분하다/제거하다" },
+  { "en": "emerge from", "ko": "~에서 나타나다/벗어나다" },
+  { "en": "experiment with", "ko": "~으로 실험하다" },
+  { "en": "graduate from", "ko": "~을 졸업하다" },
+  { "en": "insist on", "ko": "~을 주장하다/고집하다" },
+  { "en": "listen to N", "ko": "~을 경청하다" },
+  { "en": "long for", "ko": "~을 갈망하다" },
+  { "en": "look at", "ko": "~을 보다" },
+  { "en": "look for", "ko": "~을 찾다" },
+  { "en": "look into", "ko": "~을 조사하다" },
+  { "en": "pay for", "ko": "~에 대한 대가를 지불하다" },
+  { "en": "persist in", "ko": "~을 고집하다/지속하다" },
+  { "en": "prepare for", "ko": "~을 준비하다" },
+  { "en": "profit from", "ko": "~에서 이익을 얻다" },
+  { "en": "refrain from -ing", "ko": "~을 삼가다/그만두다" },
+  { "en": "strive for", "ko": "~을 위해 노력하다" },
+  { "en": "wait for", "ko": "~을 기다리다" }
+];
 
-  <!-- 총평 -->
-  <div class="summary-card">
-    <p>
-      이번 시험은 <strong>기본기와 심화 내용을 골고루 물어보는 변별력 높은 시험</strong>이었습니다.
-      시간 대비 문항 수가 많고 선지가 까다로워 객관식과 서술형을 모두 소화하기에 압박감이 컸을 것으로 분석됩니다.
-      또한 <strong>사전적 어휘력뿐 아니라 문맥적 의미 파악 능력</strong>을 동시에 요구해 전반적인 수준이 높았습니다.
-    </p>
-  </div>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let w, h, baseSpeed = 2.5;
+let score = 0, life = 5, gameActive = false, currentQuestion = null;
+let enemies = [], particles = [], stars = [];
+let player = { x: 0, y: 0, targetX: 0, tilt: 0, recoil: 0 };
+let animationId;
 
-  <!-- 1. 핵심 어법 분석 -->
-  <div class="section-title">
-    <div class="section-num">1</div>
-    <div>
-      <h2>핵심 어법 문항 심층 분석</h2>
-      <p class="section-desc">정답이 정답인 이유와 오답이 오답인 이유 모두 파악해야 합니다</p>
-    </div>
-  </div>
+function resize() { 
+    w = canvas.width = window.innerWidth; 
+    h = canvas.height = window.innerHeight; 
+    player.x = w / 2; player.y = h - 110; player.targetX = w / 2;
+}
+window.addEventListener('resize', resize);
+resize();
 
-  <div class="grammar-grid">
+for(let i=0; i<25; i++) stars.push({ x: Math.random()*w, y: Math.random()*h, s: Math.random()*2+1 });
 
-    <!-- 5형식 -->
-    <div class="grammar-card">
-      <div class="grammar-header">
-        <div class="grammar-icon icon-blue">⚙️</div>
-        <div class="grammar-title">
-          <h3>① 5형식 동사 — 부사 vs. 형용사 구분</h3>
-          <p class="sub">사역동사 · 일반 5형식 동사의 목적격 보어 자리</p>
-          <div class="problem-tags">
-            <span class="tag tag-red">2번 [4점]</span>
-            <span class="tag tag-red">3번 [5점]</span>
-            <span class="tag tag-red">서술형 1번 [4점]</span>
-          </div>
-        </div>
-      </div>
-      <div class="grammar-body">
-        <div class="trap-box">
-          <div class="trap-label">⚠ 핵심 함정</div>
-          5형식 목적격 보어 자리에는 반드시 <strong>형용사</strong>가 와야 합니다.
-          <code>made me <span class="wrong">happily</span></code> →
-          <code>made me <span class="correct">happy</span></code> 처럼
-          한국어로는 "~하게"라고 해석되어 부사를 선택하기 쉽지만, 문법 규칙상 형용사를 써야 합니다.
-        </div>
-        <div class="mistake-box">
-          <div class="mistake-label">✗ 자주 나온 실수</div>
-          "예쁘게 만들다"처럼 해석해서 <code>beautifully(부사)</code>를 선택하거나,
-          서술형에서 동명사구 주어(예: <em>Watching movies</em>)에 <code>make</code>가 아닌
-          <code>makes</code>를 빠뜨려 감점되는 사례가 많았습니다.
-        </div>
-      </div>
-    </div>
+class Enemy {
+    constructor(text, isCorrect, xPos) {
+        this.text = text; this.isCorrect = isCorrect;
+        this.x = xPos; this.y = -150;
+        this.w = w * 0.3; this.h = 95;
+        this.speed = baseSpeed + (score / 250);
+    }
+    wrapText(context, text, maxWidth) {
+        let words = text.split(" ");
+        let lines = [], currentLine = words[0];
+        for (let i = 1; i < words.length; i++) {
+            let width = context.measureText(currentLine + " " + words[i]).width;
+            if (width < maxWidth) currentLine += " " + words[i];
+            else { lines.push(currentLine); currentLine = words[i]; }
+        }
+        lines.push(currentLine); return lines;
+    }
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.fillStyle = "#fff";
+        ctx.beginPath(); ctx.roundRect(-this.w/2, 0, this.w, this.h, 12); ctx.fill();
+        ctx.textAlign = "center";
+        let fontSize = this.text.length > 10 ? 15 : 18;
+        ctx.font = `bold ${fontSize}px Pretendard`; ctx.fillStyle = "#000";
+        const lines = this.wrapText(ctx, this.text, this.w - 15);
+        const lineHeight = fontSize + 4;
+        const startY = (this.h / 2) - ((lines.length - 1) * lineHeight / 2) + 5;
+        lines.forEach((line, i) => ctx.fillText(line, 0, startY + (i * lineHeight)));
+        ctx.restore();
+    }
+    update() { this.y += this.speed; }
+}
 
-    <!-- to부정사 -->
-    <div class="grammar-card">
-      <div class="grammar-header">
-        <div class="grammar-icon icon-amber">📌</div>
-        <div class="grammar-title">
-          <h3>② to부정사 형용사적 용법 — 어순과 전치사</h3>
-          <p class="sub">명사 수식 어순 / 불필요한 말 vs. 누락된 말 판단</p>
-          <div class="problem-tags">
-            <span class="tag tag-red">3번 [5점]</span>
-          </div>
-        </div>
-      </div>
-      <div class="grammar-body">
-        <div class="trap-box">
-          <div class="trap-label">⚠ 핵심 함정</div>
-          올바른 어순에 대한 명확한 이해, 그리고 필요한 말이 빠졌는지·불필요한 말이 들어갔는지를
-          판단하는 능력이 요구되었습니다.
-          <br><br>
-          예) <code>Do you have <strong>to eat anything</strong>?</code> →
-          올바른 형태는 <code>Do you have <strong>anything to eat</strong>?</code>
-        </div>
-        <div class="mistake-box">
-          <div class="mistake-label">✗ 자주 나온 실수</div>
-          비전형적 표현(<em>It's to go time</em> 등)이 섞여 출제의도를 파악하지 못하고 혼란을 겪은 경우가 많았습니다.
-          to부정사가 앞에 오는 명사를 뒤에서 수식한다는 원칙을 문장 단위로 반드시 체크해야 합니다.
-        </div>
-      </div>
-    </div>
+function startGame(speed) {
+    baseSpeed = speed;
+    score = 0; life = 5;
+    enemies = []; particles = [];
+    gameActive = true;
+    
+    document.getElementById('start-menu').style.display = 'none';
+    document.getElementById('game-over').style.display = 'none';
+    document.getElementById('home-btn').style.display = 'block';
+    document.getElementById('score-board').style.display = 'block';
+    document.getElementById('life-board').style.display = 'block';
+    document.getElementById('question-area').style.display = 'block';
+    
+    updateUI();
+    spawn();
+    loop();
+}
 
-    <!-- 간접의문문 -->
-    <div class="grammar-card">
-      <div class="grammar-header">
-        <div class="grammar-icon icon-green">❓</div>
-        <div class="grammar-title">
-          <h3>③ 간접의문문 — 어순·시제·의문사 주어</h3>
-          <p class="sub">의문사 + 주어 + 동사 어순 / 시제 일치</p>
-          <div class="problem-tags">
-            <span class="tag tag-red">4번</span>
-            <span class="tag tag-red">서술형 3번</span>
-          </div>
-        </div>
-      </div>
-      <div class="grammar-body">
-        <div class="trap-box">
-          <div class="trap-label">⚠ 핵심 함정</div>
-          의문사 + 주어 + 동사 어순은 기본이지만, <strong>의문사가 주어인 경우</strong>와
-          <strong>시제 일치</strong>가 고비였습니다.<br><br>
-          예) <code>who Brian broke the window</code> →
-          의문사 who와 주어 Brian이 중복되므로 오류. 의문사 자체가 주어이므로
-          <code>who broke the window</code>가 정답.
-        </div>
-        <div class="mistake-box">
-          <div class="mistake-label">✗ 자주 나온 실수</div>
-          서술형 3번은 영어 키워드가 전혀 제공되지 않아 어휘력과 문장력을 동시에 요구하는
-          최고 난도 문항이었습니다. 시제를 현재에서 과거로 일치시키는 것도 놓치기 쉬운 포인트였습니다.
-        </div>
-      </div>
-    </div>
+function retryGame() { startGame(baseSpeed); }
 
-  </div><!-- /grammar-grid -->
+function backToMenu() {
+    gameActive = false;
+    cancelAnimationFrame(animationId);
+    document.getElementById('start-menu').style.display = 'block';
+    document.getElementById('game-over').style.display = 'none';
+    document.getElementById('home-btn').style.display = 'none';
+    document.getElementById('score-board').style.display = 'none';
+    document.getElementById('life-board').style.display = 'none';
+    document.getElementById('question-area').style.display = 'none';
+    ctx.clearRect(0, 0, w, h);
+}
 
-  <!-- 2. 어법 예시 문제 -->
-  <div class="section-title">
-    <div class="section-num">2</div>
-    <div>
-      <h2>어법 예시 문제 풀이</h2>
-      <p class="section-desc">이해를 돕기 위한 변형 문항 — 실제 출제 문제에서 변형된 예시입니다</p>
-    </div>
-  </div>
+function spawn() {
+    if(!gameActive) return;
+    currentQuestion = phraseData[Math.floor(Math.random() * phraseData.length)];
+    document.getElementById('en-text').innerText = currentQuestion.en;
+    let others = phraseData.filter(item => item.ko !== currentQuestion.ko).sort(() => Math.random() - 0.5);
+    let opts = [{ text: currentQuestion.ko, isCorrect: true }, { text: others[0].ko, isCorrect: false }, { text: others[1].ko, isCorrect: false }].sort(() => Math.random() - 0.5);
+    enemies = [];
+    const sectors = [w * 0.18, w * 0.5, w * 0.82];
+    opts.forEach((opt, i) => enemies.push(new Enemy(opt.text, opt.isCorrect, sectors[i])));
+}
 
-  <div style="display:grid; gap:20px;">
+function loop() {
+    if(!gameActive) return;
+    ctx.fillStyle = "#050810"; ctx.fillRect(0,0,w,h);
+    stars.forEach(s => {
+        ctx.fillStyle = "#ffffff33"; ctx.fillRect(s.x, s.y, 2, 2);
+        s.y += s.s * (baseSpeed * 2); if(s.y > h) s.y = -5;
+    });
+    particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy; p.l -= 0.03;
+        ctx.globalAlpha = p.l; ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, 5, 5);
+        if(p.l <= 0) particles.splice(i,1);
+    });
+    ctx.globalAlpha = 1;
+    for(let i = enemies.length - 1; i >= 0; i--) {
+        let en = enemies[i]; en.update(); en.draw();
+        if(en.y > h) {
+            if(en.isCorrect) { life--; updateUI(); if(life > 0) spawn(); }
+            enemies.splice(i, 1);
+            if(enemies.length === 0 && gameActive) spawn();
+        }
+    }
+    let moveDiff = player.targetX - player.x;
+    player.tilt = moveDiff * 0.06; player.x += moveDiff * 0.2;
+    if(player.recoil > 0) player.recoil -= 2;
+    ctx.save();
+    ctx.translate(player.x, player.y + player.recoil); ctx.rotate(player.tilt * Math.PI / 180);
+    ctx.fillStyle = "#007aff"; ctx.beginPath(); ctx.moveTo(0, -35); ctx.lineTo(-30, 20); ctx.lineTo(30, 20); ctx.fill();
+    ctx.fillStyle = "#55aaff"; ctx.fillRect(-45, 0, 90, 8);
+    ctx.fillStyle = Math.random() > 0.5 ? "#ffae00" : "#ff4400"; ctx.fillRect(-10, 20, 20, 15);
+    ctx.restore();
+    if(life <= 0) {
+        gameActive = false;
+        document.getElementById('game-over').style.display = 'block';
+        document.getElementById('final-stats').innerText = `최종 점수: ${score}`;
+    } else animationId = requestAnimationFrame(loop);
+}
 
-    <!-- 변형 1 -->
-    <div class="example-card">
-      <div class="example-header">
-        <span>변형 문항</span>
-        <h3>1 — 어법상 옳은 문장 고르기</h3>
-      </div>
-      <div class="example-note">※ 아래 각 문장의 오류와 올바른 형태를 확인하세요.</div>
+function updateUI() {
+    document.getElementById('score-board').innerText = "SCORE: " + score;
+    document.getElementById('life-board').innerText = "❤".repeat(Math.max(0, life));
+}
 
-      <div class="problem-item">
-        <div class="problem-sentence">The music made the audience <span class="wrong">sadly</span>.</div>
-        <div class="analysis-text">
-          5형식 보어 자리 → 부사 ✗ / 형용사 <strong>sad</strong> ✓<br>
-          "슬프게 만들었다"는 해석이지만, 보어이므로 형용사를 써야 합니다.
-        </div>
-      </div>
+function handleInput(ex, ey) {
+    if(!gameActive) return;
+    player.targetX = ex; player.recoil = 15;
+    for(let i = enemies.length - 1; i >= 0; i--) {
+        let en = enemies[i];
+        if(ex > en.x - en.w/2 - 20 && ex < en.x + en.w/2 + 20 && ey > en.y && ey < en.y + en.h + 30) {
+            if(en.isCorrect) {
+                score += 10; updateUI(); spawn();
+                for(let j=0; j<15; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*15, vy:(Math.random()-0.5)*15, l:1, c:"#f1c40f"});
+            } else {
+                life--; updateUI(); enemies.splice(i, 1);
+                for(let j=0; j<15; j++) particles.push({x:en.x, y:en.y+40, vx:(Math.random()-0.5)*15, vy:(Math.random()-0.5)*15, l:1, c:"#ff4757"});
+                if(enemies.length === 0) spawn();
+            }
+            break;
+        }
+    }
+}
 
-      <div class="problem-item">
-        <div class="problem-sentence">I wonder why <span class="wrong">did he cry</span>.</div>
-        <div class="analysis-text">
-          간접의문문 어순 → 의문사 + <strong>주어 + 동사</strong> 순서 ✓<br>
-          올바른 형태: <em>why he cried</em>
-        </div>
-      </div>
-
-      <div class="problem-item">
-        <div class="problem-sentence">He asked her <span class="wrong">finish</span> the homework.</div>
-        <div class="analysis-text">
-          목적격 보어 자리 → 동사원형 ✗ / <strong>to finish</strong> ✓<br>
-          ask는 5형식에서 to부정사를 목적격 보어로 취합니다.
-        </div>
-      </div>
-
-      <div class="problem-item">
-        <div class="problem-sentence">They want to know how <span class="wrong">is the weather</span>.</div>
-        <div class="analysis-text">
-          간접의문문 어순 오류 → <strong>how the weather is</strong> ✓<br>
-          간접의문문 속 절은 평서문 어순(주어 + 동사)을 따릅니다.
-        </div>
-      </div>
-    </div>
-
-    <!-- 변형 2 -->
-    <div class="example-card">
-      <div class="example-header">
-        <span>변형 문항</span>
-        <h3>2 — 어법상 옳은 문장의 개수 고르기</h3>
-      </div>
-      <div class="example-note">※ ✅ = 옳은 문장 / ❌ = 틀린 문장</div>
-
-      <div class="problem-item">
-        <div class="problem-sentence">✅ Do you have anything to drink?</div>
-        <div class="analysis-text">
-          to부정사의 형용사적 용법이 anything을 뒤에서 수식하는 올바른 문장.
-        </div>
-      </div>
-
-      <div class="problem-item">
-        <div class="problem-sentence">❌ I want a repairman <span class="wrong">repaired</span> the door.</div>
-        <div class="analysis-text">
-          목적어(a repairman)와 보어의 관계가 능동이므로 → <strong>to repair</strong> ✓
-        </div>
-      </div>
-
-      <div class="problem-item">
-        <div class="problem-sentence">✅ Watching a movie makes him happy.</div>
-        <div class="analysis-text">
-          동명사 주어 → 단수 동사 makes ✓ / 보어 자리에 형용사 happy ✓ — 완벽한 문장.
-        </div>
-      </div>
-
-      <div class="problem-item">
-        <div class="problem-sentence">❌ The rain made the road <span class="wrong">dangerously</span>.</div>
-        <div class="analysis-text">
-          5형식 보어 자리 → 부사 ✗ / 형용사 <strong>dangerous</strong> ✓<br>
-          해석상 "위험하게"라도 보어이므로 형용사를 씁니다.
-        </div>
-      </div>
-
-      <div class="problem-item">
-        <div class="problem-sentence">✅ Losing the game makes her depressed, and it makes him angry.</div>
-        <div class="analysis-text">
-          목적격 보어에 형용사 depressed, angry가 올바르게 사용된 문장. <strong>정답: 3개</strong>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- 3. 고난도·중난도 문항 -->
-  <div class="section-title">
-    <div class="section-num">3</div>
-    <div>
-      <h2>난이도별 핵심 문항</h2>
-      <p class="section-desc">어휘력과 문맥 이해가 동시에 요구된 문항들</p>
-    </div>
-  </div>
-
-  <div style="background:var(--bg-card); border-radius:14px; border:1px solid var(--border); box-shadow:var(--shadow); padding:24px 28px;">
-    <p style="font-size:13.5px; color:var(--text-mid); margin-bottom:18px; line-height:1.8;">
-      이번 시험은 단순 암기를 넘어 <strong style="color:var(--navy);">사전적 어휘력 + 문맥적 의미 추론</strong> 능력을
-      동시에 평가했습니다. 특히 12번처럼 본문과 다른 어휘로 내용을 재진술하는 paraphrasing 문항은
-      글의 감정 흐름 전체를 이해해야 풀 수 있었습니다.
-    </p>
-
-    <p style="font-size:12px; font-weight:700; color:var(--text-light); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">최고 난도 문항</p>
-    <div class="difficulty-row" style="margin-bottom:20px;">
-      <span class="diff-chip diff-hard">12번 — 재진술 오류 찾기</span>
-      <span class="diff-chip diff-hard">16번 — 수 일치·혼동 어휘·맥락</span>
-      <span class="diff-chip diff-hard">25번 — 단락 핵심 단어 추출</span>
-      <span class="diff-chip diff-hard">서술형 3번 — 100% 어휘·어법</span>
-    </div>
-
-    <p style="font-size:12px; font-weight:700; color:var(--text-light); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">중간 난도 문항</p>
-    <div class="difficulty-row">
-      <span class="diff-chip diff-mid">21번 — 빈칸(내용 요약)</span>
-      <span class="diff-chip diff-mid">서술형 1번 — 5형식·수 일치</span>
-      <span class="diff-chip diff-mid">서술형 2번 — 한→영 전환</span>
-    </div>
-
-    <div style="margin-top:22px; background:#f0f4ff; border-radius:8px; padding:14px 18px; font-size:13px; color:#344; line-height:1.7;">
-      <strong>📌 12번 분석:</strong> 본문의 '슬프지만 행복했다'는 감정을
-      <em>frustrated(좌절한)</em>라는 부정적 단어로 변형하여 재진술하였기 때문에,
-      단어의 뉘앙스 차이를 문맥 속에서 구별할 수 있어야 정답을 찾을 수 있었습니다.
-    </div>
-  </div>
-
-  <!-- 4. 문항 유형 분석 -->
-  <div class="section-title">
-    <div class="section-num">4</div>
-    <div>
-      <h2>전체 문항 유형 분석표</h2>
-      <p class="section-desc"><span style="color:var(--accent); font-weight:700;">●</span> 표시 문항은 어법 관련 문제입니다</p>
-    </div>
-  </div>
-
-  <div class="type-table-wrap">
-    <table class="type-table">
-      <thead>
-        <tr>
-          <th>번호</th>
-          <th>문항 유형</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>1번</td><td>영영 풀이</td></tr>
-        <tr><td>2번</td><td><span class="grammar-mark"></span>어법상 옳은 문장 찾기</td></tr>
-        <tr><td>3번</td><td><span class="grammar-mark"></span>어법상 옳은 문장 개수 고르기</td></tr>
-        <tr><td>4번</td><td><span class="grammar-mark"></span>직접의문문 → 간접의문문 전환</td></tr>
-        <tr><td>5번</td><td>대화문 빈칸에 들어갈 말 찾기</td></tr>
-        <tr><td>6번</td><td>대화문 내용 불일치 찾기</td></tr>
-        <tr><td>7번</td><td>대화문 빈칸 고르기</td></tr>
-        <tr><td>8번</td><td>대화문 흐름에 맞게 배열하기</td></tr>
-        <tr><td>9번</td><td>대화문 내용 불일치 찾기</td></tr>
-        <tr><td>서술형 1</td><td><span class="grammar-mark"></span>5형식 문장 만들기 (단어 변형·수 일치 포함)</td></tr>
-        <tr><td>10번</td><td>영영 풀이 본문 중 해당 없는 것 찾기</td></tr>
-        <tr><td>11번</td><td>지시 대상이 다른 것 찾기 (지칭 이해)</td></tr>
-        <tr><td>12번</td><td>재진술 오류 문장 찾기 (내용 함축 어휘)</td></tr>
-        <tr><td>13번</td><td><span class="grammar-mark"></span>어순 배열 준서술형</td></tr>
-        <tr><td>서술형 2</td><td>한글 → 영어 전환 (일부 단어 제시, 어휘 활용)</td></tr>
-        <tr><td>14번</td><td>빈칸 고르기 (형용사 어휘)</td></tr>
-        <tr><td>15번</td><td>교과서 외부 지문에서 추론 불가 내용 찾기</td></tr>
-        <tr><td>16번</td><td><span class="grammar-mark"></span>어법(수 일치) + 혼동 어휘 + 맥락 이해</td></tr>
-        <tr><td>17번</td><td><span class="grammar-mark"></span>어법 (시제 일치·병렬구조·수 일치)</td></tr>
-        <tr><td>18번</td><td>문장 삽입 (문맥상 적절한 위치 찾기)</td></tr>
-        <tr><td>19번</td><td>내용 일치 모두 고르기</td></tr>
-        <tr><td>20번</td><td>지문에서 알 수 있는 것 고르기</td></tr>
-        <tr><td>21번</td><td>빈칸 고르기 (내용 요약)</td></tr>
-        <tr><td>22번</td><td>글의 요지 찾기</td></tr>
-        <tr><td>23번</td><td>글의 제목으로 적절한 것 찾기</td></tr>
-        <tr><td>24번</td><td>주어진 정보 판단 (서양·동양 이모지 비교)</td></tr>
-        <tr><td>25번</td><td>단락 요약 (핵심 단어 찾기)</td></tr>
-        <tr><td>서술형 3</td><td><span class="grammar-mark"></span>한글 → 영어 전환 (100% 어휘·어법 능력)</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- 5. 기말고사 대비 -->
-  <div class="section-title">
-    <div class="section-num">5</div>
-    <div>
-      <h2>기말고사 대비 전략</h2>
-      <p class="section-desc">다음 시험 범위는 수동태와 관계대명사 — 고등 어법의 핵심입니다</p>
-    </div>
-  </div>
-
-  <div class="next-card">
-    <h3>기말 핵심 어법 <span class="next-tag">미리 준비</span></h3>
-
-    <div class="next-item">
-      <div class="next-dot"></div>
-      <div>
-        <div class="next-item-title">관계대명사 — 생략·올바른 격·선행사와 수 일치</div>
-        <div class="next-item-desc">
-          이번 서술형 1번에서 요구한 수 일치처럼, 기말에도
-          <em>The people who (is/are) standing there</em> 같은 형태로 선행사에 맞춘 동사 변화를 반드시 체크해야 합니다.
-          관계대명사의 격(주격·목적격·소유격)과 생략 가능 여부도 꼼꼼히 정리하세요.
-        </div>
-      </div>
-    </div>
-
-    <div class="next-item">
-      <div class="next-dot"></div>
-      <div>
-        <div class="next-item-title">수동태 — 능동↔수동 전환 · 올바른 형태 고르기</div>
-        <div class="next-item-desc">
-          한국어 해석으로 능동/수동을 판단하는 습관을 버려야 합니다.
-          어법 규칙(목적어 유무, 행위의 방향)에 따라 판단하는 훈련이 핵심입니다.
-          수동태 또한 고등에서도 빈출 어법이므로 철저히 대비해야 합니다.
-        </div>
-      </div>
-    </div>
-
-    <div class="next-item">
-      <div class="next-dot"></div>
-      <div>
-        <div class="next-item-title">내용 이해 — 교과서 대화문·본문·프린트 지문 전 범위</div>
-        <div class="next-item-desc">
-          다양한 유형(요지·제목·빈칸·삽입·추론)으로 출제됩니다.
-          선지의 디테일까지 꼼꼼하게 확인하는 습관을 들이고, 지문별 핵심 내용을 요약 정리해 두세요.
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /container -->
-
-<div class="footer">
-  본 자료는 가온중학교 2학년 중간고사 분석 자료로, 학생 및 학부모 안내 목적으로 제작되었습니다.<br>
-  어법 예시 문항은 실제 출제 문제에서 변형된 문제입니다.
-</div>
-
+canvas.addEventListener('touchstart', (e) => {
+    const t = e.touches[0]; handleInput(t.clientX, t.clientY);
+    e.preventDefault();
+}, {passive: false});
+canvas.addEventListener('mousedown', (e) => handleInput(e.clientX, e.clientY));
+window.addEventListener('mousemove', (e) => { if(gameActive) player.targetX = e.clientX; });
+</script>
 </body>
 </html>
